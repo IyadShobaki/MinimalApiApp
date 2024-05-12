@@ -8,10 +8,11 @@ public static class TodoEndpoints
     public static void AddTodoEndpoints(this WebApplication app)
     {
         app.MapGet("/api/Todos", GetAllTodos);
-        app.MapPost("/api/Todos", CreateTodo);
-        app.MapDelete("/api/Todos/{id}", DeleteTodo);
+        app.MapPost("/api/Todos", CreateTodo);//.RequireAuthorization();
+        app.MapDelete("/api/Todos/{id}", DeleteTodo);//.RequireAuthorization();
     }
 
+    //[Authorize] // Either we add Authorize on top of the methid or add .RequireAuthorization(); like above
     private async static Task<IResult> GetAllTodos(ITodoData data)
     {
         var output = await data.GetAllAssigned(1);
