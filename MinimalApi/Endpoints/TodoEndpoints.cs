@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 using TodoLibrary.DataAccess;
 
 namespace MinimalApi.Endpoints;
@@ -8,7 +9,27 @@ public static class TodoEndpoints
     public static void AddTodoEndpoints(this WebApplication app)
     {
         app.MapGet("/api/Todos", GetAllTodos);
-        app.MapPost("/api/Todos", CreateTodo);//.RequireAuthorization();
+
+        app.MapPost("/api/Todos", CreateTodo)
+            .AddEndpointFilter(async (context, next) =>
+            {
+
+                var task = context.GetArgument<string>(1);
+
+                if (string.IsNullOrWhiteSpace(task))
+                {
+                    return Results.BadRequest("Task can not be null.");
+                }
+                Regex taskRegex = new Regex(@"[^0-9A-Za-z]");
+
+                if (taskRegex.IsMatch(task) || task.Length < 6)
+                {
+
+                    return Results.BadRequest("Task can only contains letters and numbers, and it must be at least 6 characters long.");
+                }
+                return await next(context);
+            }).AllowAnonymous();
+
         app.MapDelete("/api/Todos/{id}", DeleteTodo);//.RequireAuthorization();
     }
 
